@@ -1,14 +1,24 @@
 import json
 
 
-class Encoder(json.JSONEncoder):
-    def default(self, o):
-        return {k.lstrip('_'): v for k, v in vars(o).items() if v is not None}
-
-
 class Message:
     def __str__(self):
         return self.to_json()
 
-    def to_json(self):
-        return json.dumps(self, cls=Encoder, ensure_ascii=False)
+    def to_dict(self) -> dict:
+        result = {}
+        for name in self.__slots__:
+            if name[:2] == '__':
+                name = name[2:]
+            elif name[:1] == '_':
+                name = name[1:]
+
+            value = getattr(self, name)
+            if value is None:
+                continue
+
+            result[name] = value
+        return result
+
+    def to_json(self) -> str:
+        return str(json.dumps(self.to_dict(), default=lambda o: o.to_dict()))
