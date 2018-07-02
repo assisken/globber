@@ -1,7 +1,7 @@
 import json
 
 
-class Message:
+class Webhook:
     def __str__(self):
         return self.to_json()
 

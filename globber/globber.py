@@ -5,7 +5,7 @@ from datetime import datetime
 from aiofiles import open
 
 
-class Broadcaster:
+class Globber:
     type_stamp = {
         'info': {'long': 'INFO', 'short': 'I'},
         'error': {'long': 'ERROR', 'short': 'E'},
@@ -53,7 +53,7 @@ class Broadcaster:
         )
 
 
-broadcast = Broadcaster(('error', 'info', 'debug'))
+broadcast = Globber(('error', 'info', 'debug'))
 
 
 @broadcast.listener
