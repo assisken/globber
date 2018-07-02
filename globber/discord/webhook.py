@@ -1,24 +1,26 @@
-import json
+from typing import Tuple
+
+import requests
+from . import Message
+from requests import Response
+
+from .embed import Embed
 
 
-class Webhook:
-    def __str__(self):
-        return self.to_json()
+class Webhook(Message):
+    __slots__ = ('content', 'username', 'avatar_url', 'tts', 'file', 'embeds')
 
-    def to_dict(self) -> dict:
-        result = {}
-        for name in self.__slots__:
-            if name[:2] == '__':
-                name = name[2:]
-            elif name[:1] == '_':
-                name = name[1:]
+    def __init__(self, **kwargs):
+        self.content: str = kwargs.pop('content', None)
+        self.username: str = kwargs.pop('username', None)
+        self.avatar_url: str = kwargs.pop('avatar_url', None)
+        self.tts: bool = kwargs.pop('tts', False)
+        self.file = None
+        self.embeds: Tuple[Embed] = kwargs.pop('embeds', None)
 
-            value = getattr(self, name)
-            if value is None:
-                continue
-
-            result[name] = value
-        return result
-
-    def to_json(self) -> str:
-        return str(json.dumps(self.to_dict(), default=lambda o: o.to_dict()))
+    def post(self, url: str) -> Response:
+        headers = {'Content-Type': 'application/json'}
+        resp = requests.post(url=url,
+                             data=self.to_json(),
+                             headers=headers)
+        return resp

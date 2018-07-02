@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Field(Webhook):
+class Field(Message):
     __slots__ = ('name', 'value', 'inline')
 
     def __init__(self, **kwargs):

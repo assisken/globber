@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Video(Webhook):
+class Video(Message):
     __slots__ = ('url', 'height', 'width')
 
     def __init__(self, **kwargs):

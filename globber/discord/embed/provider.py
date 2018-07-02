@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Provider(Webhook):
+class Provider(Message):
     __slots__ = ('name', 'url')
 
     def __init__(self, **kwargs):

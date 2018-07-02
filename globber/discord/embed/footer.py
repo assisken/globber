@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Footer(Webhook):
+class Footer(Message):
     __slots__ = ('text', 'icon_url', 'proxy_icon_url')
 
     def __init__(self, **kwargs):

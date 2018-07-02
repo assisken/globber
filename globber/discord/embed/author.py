@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Author(Webhook):
+class Author(Message):
     __slots__ = ('name', 'url', 'icon_url', 'proxy_icon_url')
 
     def __init__(self, **kwargs):

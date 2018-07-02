@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Other(Webhook):
+class Other(Message):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 

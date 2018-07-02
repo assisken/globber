@@ -3,6 +3,11 @@
 Discord
 =======
 
+Message
+-------
+.. autoclass:: Message
+   :members:
+
 Webhook
 -------
 .. autoclass:: Webhook

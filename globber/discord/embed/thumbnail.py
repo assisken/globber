@@ -1,7 +1,7 @@
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Thumbnail(Webhook):
+class Thumbnail(Message):
     __slots__ = ('url', 'proxy_url', 'height', 'width')
 
     def __init__(self, **kwargs):

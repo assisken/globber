@@ -9,10 +9,10 @@ from globber.discord.embed.image import Image
 from globber.discord.embed.provider import Provider
 from globber.discord.embed.thumbnail import Thumbnail
 from globber.discord.embed.video import Video
-from globber.discord.webhook import Webhook
+from globber.discord import Message
 
 
-class Embed(Webhook):
+class Embed(Message):
     """
     An embed message that used in discord.
 
