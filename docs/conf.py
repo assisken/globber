@@ -13,9 +13,11 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+here = os.path.abspath(os.path.dirname(__file__) + '/../')
 
 # -- Project information -----------------------------------------------------
 
@@ -23,8 +25,14 @@ project = 'globber'
 copyright = '2018, assisken'
 author = 'assisken'
 
-# The short X.Y version
-version = '0.0.dev1'
+verstrline = open('{}/{}/__init__.py'.format(here, project), 'r').read()
+version_re = r'^__version__ = [\'"]([^\'"]*)[\'"]'
+match = re.search(version_re, verstrline, re.M)
+if match:
+    version = match.group(1)
+else:
+    raise RuntimeError('Unable to find version string in __init__.py')
+
 # The full version, including alpha/beta/rc tags
 release = ''
 
@@ -155,3 +163,8 @@ texinfo_documents = [
      author, 'globber', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+rst_prolog = """
+.. |coroutine| replace:: This function is a coroutine_.
+.. _coroutine: https://docs.python.org/3/library/asyncio-task.html#coroutine
+"""

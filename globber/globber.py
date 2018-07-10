@@ -1,70 +1,131 @@
 import asyncio
 from asyncio import Future
-from typing import Callable
 from datetime import datetime
-from aiofiles import open
+from enum import Enum, auto
+from typing import Callable, Tuple
+
+
+class State(Enum):
+    """
+    Enum for state that will be broadcast to listeners.
+    """
+    debug = auto()
+    info = auto()
+    error = auto()
+    critical = auto()
 
 
 class Globber:
-    type_stamp = {
-        'info': {'long': 'INFO', 'short': 'I'},
-        'error': {'long': 'ERROR', 'short': 'E'},
-        'debug': {'long': 'DEBUG', 'short': 'D'}
-    }
+    """
+    Class that broadcasts text to listeners.
 
-    def __init__(self, modes: tuple = (), **kwargs):
+    Attributes
+    ----------
+    modes : Tuple[State, ...]
+        Broadcaster's modes.
+    time_stamp : str
+        Timestamp of output text
+    stamp : str
+        Stamp of output text
+    """
+
+    def __init__(self, modes: Tuple[State, ...] = (), **kwargs):
         self.modes = modes
-        self.format = kwargs.pop('format', 'short')
         self.time_stamp = '%d-%m-%Y %H:%M:%S'
         self.stamp = '{time} [{state}] {content}\n'
-        self.coros = []
-        self.loop = asyncio.get_event_loop()
+        self.__coros = []
+        self.__loop = asyncio.get_event_loop()
+        self.__format = kwargs.pop('format', 'short')
 
     def __getattr__(self, name: str):
-        if name not in self.modes:
-            def _(*args, **kwargs):
-                pass
+        """
+        A magic method that suppresses methods that not included in :attr:`modes`.
+        The rest of them will broadcast message to listeners.
+
+        Parameters
+        ----------
+        name : str
+            Name of calling method.
+
+        Examples
+        --------
+        .. highlight:: python
+        .. code-block:: python
+
+           broadcaster = Globber((State.info))
+           @broadcaster.listener
+           async def printer(text):
+               print(text)
+
+           broadcaster.info('Info text')
+           broadcaster.error('Will be suppressed')
+
+        Output:
+
+        .. code-block:: none
+
+           01-01-1971 12:12:12 [INFO] Info text
+        """
+        def _missing(text):
+            self.__send(state, text)
+
+        def _(*args, **kwargs):
+            pass
+
+        for mode in self.modes:
+            if name == mode.name:
+                state = mode
+                return _missing
+        else:
             return _
 
-        def _missing(text):
-            self.__send(self.type_stamp[name][self.format], text)
-        return _missing
-
     def listener(self, coro: Callable):
-        async def wrapper(future: Future, text: str):
-            await coro(text)
+        """
+        A decorator that adds listener.
+
+        Parameters
+        ----------
+        coro : Callable
+            Listener's function.
+
+        Examples
+        --------
+        .. highlight:: python
+        .. code-block:: python
+
+           broadcaster = Globber((State.info))
+
+           @broadcaster.listener
+           async def printer(text):
+               print('Printing message:')
+               print(text)
+
+           broadcaster.info('Info text')
+
+        Output:
+
+        .. code-block:: none
+
+           Printing message:
+           01-01-1971 12:12:12 [INFO] Info text
+        """
+        async def wrapper(future: Future, text: str, **kwargs):
+            await coro(text, **kwargs)
             future.set_result(True)
 
-        self.coros.append(wrapper)
+        self.__coros.append(wrapper)
 
-    def __send(self, state: str, text: str):
-        content = self.stamp.format(
-            time=datetime.now().strftime(self.time_stamp),
-            state=state,
-            content=text
-        )
+    def __send(self, state: State, text: str):
+        kwargs = {
+            'time': datetime.utcnow().strftime(self.time_stamp),
+            'state': state.name.upper(),
+            'content': text
+        }
         tasks = []
-        for coro in self.coros:
+        for coro in self.__coros:
             future = asyncio.Future()
-            asyncio.ensure_future(coro(future, content))
+            asyncio.ensure_future(coro(future, self.stamp.format(**kwargs), **kwargs))
             tasks.append(future)
-        self.loop.run_until_complete(
+        self.__loop.run_until_complete(
             asyncio.gather(*tasks)
         )
-
-
-broadcast = Globber(('error', 'info', 'debug'))
-
-
-@broadcast.listener
-async def filer(text: str):
-    async with open('log.txt', 'a') as file:
-        await file.write(text)
-
-
-@broadcast.listener
-async def printer(text: str):
-    print(text)
-
-
-broadcast.error('Hello there!')

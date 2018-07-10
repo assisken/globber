@@ -99,7 +99,7 @@ class Embed(Message):
         return attr.isoformat()
 
     @timestamp.setter
-    def timestamp(self, value: Optional[Union[datetime, float]]):
+    def timestamp(self, value: Optional[str]):
         if value is None:
             pass
         elif isinstance(value, datetime):

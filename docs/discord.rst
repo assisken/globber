@@ -16,7 +16,7 @@ Webhook
 .. currentmodule:: globber.discord.embed
 
 Embed
-------
+-----
 .. autoclass:: Embed
    :members:
 
